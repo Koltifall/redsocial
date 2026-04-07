@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Developer | Enterprise Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent: #3b82f6;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #020202;
+            color: #f3f4f6;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+        }
+
+        .liquid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.12) 0%, transparent 50%),
+                        radial-gradient(circle at 90% 90%, rgba(139, 92, 246, 0.12) 0%, transparent 50%);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+
+        .nav-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-gradient:hover {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        input, textarea {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: white;
+        }
+        input:focus, textarea:focus {
+            border-color: var(--accent);
+            outline: none;
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .post-card { transition: border 0.3s ease; }
+        .post-card:hover { border-color: rgba(59, 130, 246, 0.3); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade { animation: fadeIn 0.4s ease forwards; }
+    </style>
+</head>
+<body class="custom-scrollbar">
+    <div class="liquid-bg"></div>
+
+    <div id="app">
+        <!-- VISTA DE AUTENTICACIÓN (LOGIN/REGISTRO) -->
+        <section id="view-auth" class="min-h-screen flex items-center justify-center p-6 animate-fade">
+            <div class="glass w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl border-white/5">
+                <div class="text-center mb-10">
+                    <h1 class="text-4xl font-black tracking-tighter text-white mb-2 italic">CODE DEVELOPER</h1>
+                    <p class="text-gray-500 text-sm font-medium" id="auth-subtitle">ACCESO AL TERMINAL</p>
+                </div>
+
+                <div id="auth-form" class="space-y-5">
+                    <!-- Campos para Usuario -->
+                    <div id="user-fields" class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] ml-1">Nombre de Usuario</label>
+                            <input type="text" id="reg-user" class="w-full rounded-2xl px-5 py-4" placeholder="sin_espacios">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] ml-1">Contraseña (Mín. 6)</label>
+                            <input type="password" id="reg-pass" class="w-full rounded-2xl px-5 py-4" placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <!-- Campos para Admin -->
+                    <div id="admin-fields" class="hidden space-y-4">
+                        <div class="p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl flex items-center gap-4">
+                            <i class="fas fa-fingerprint text-amber-500 text-xl"></i>
+                            <p class="text-amber-500 text-[9px] font-black uppercase tracking-widest leading-tight">Acceso Restringido: Requiere credenciales maestras</p>
+                        </div>
+                        <input type="text" id="admin-nro" class="w-full rounded-2xl px-5 py-4" placeholder="Nro: 593-EC.dev">
+                        <input type="password" id="admin-clave" class="w-full rounded-2xl px-5 py-4" placeholder="Clave Maestra">
+                    </div>
+
+                    <button onclick="processAuth()" class="w-full btn-gradient py-4 rounded-2xl font-bold text-sm tracking-widest mt-4">
+                        INGRESAR
+                    </button>
+
+                    <div class="pt-8 border-t border-white/5 text-center">
+                        <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-gray-500 text-[10px] hover:text-white transition-all uppercase tracking-[0.3em] font-black">
+                            ¿ERES ADMIN?
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA DASHBOARD -->
+        <section id="view-dashboard" class="hidden min-h-screen flex">
+            <!-- Sidebar -->
+            <aside class="w-20 md:w-72 border-r border-white/5 flex flex-col bg-[#010101] z-50">
+                <div class="p-8 mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center">
+                            <i class="fas fa-code text-white"></i>
+                        </div>
+                        <span class="hidden md:block font-black text-lg tracking-tighter italic">CODE DEV</span>
+                    </div>
+                </div>
+
+                <nav class="flex-1 px-4 space-y-2" id="main-nav"></nav>
+
+                <div class="p-6 border-t border-white/5">
+                    <div id="user-badge" class="mb-6 p-3 glass rounded-2xl hidden md:flex items-center gap-3 overflow-hidden">
+                        <div id="badge-avatar" class="w-8 h-8 min-w-[32px] rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs uppercase"></div>
+                        <div class="overflow-hidden">
+                            <p id="badge-name" class="text-xs font-bold truncate text-white"></p>
+                            <p id="badge-role" class="text-[9px] text-gray-500 uppercase font-black"></p>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="w-full flex items-center justify-center md:justify-start gap-4 p-4 text-gray-500 hover:text-red-400 hover:bg-red-500/5 rounded-2xl transition-all">
+                        <i class="fas fa-power-off"></i>
+                        <span class="hidden md:block font-bold text-xs uppercase tracking-widest">Cerrar Sesión</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 overflow-y-auto custom-scrollbar bg-[#030303] p-8" id="main-content">
+                <!-- Inyectado dinámicamente -->
+            </main>
+        </section>
+    </div>
+
+    <script>
+        // --- BASE DE DATOS LOCAL CON PERSISTENCIA ---
+        const DB = {
+            getUsers: () => JSON.parse(localStorage.getItem('cd_db_users')) || [],
+            saveUser: (user) => {
+                const users = DB.getUsers();
+                if (!users.find(u => u.username === user.username)) {
+                    users.push({ 
+                        username: user.username, 
+                        password: user.password,
+                        registeredAt: new Date().toISOString(), 
+                        id: Date.now() 
+                    });
+                    localStorage.setItem('cd_db_users', JSON.stringify(users));
+                }
+            },
+            getPosts: () => JSON.parse(localStorage.getItem('cd_db_posts')) || [],
+            savePost: (post) => {
+                const posts = DB.getPosts();
+                posts.unshift(post);
+                localStorage.setItem('cd_db_posts', JSON.stringify(posts));
+            },
+            banUser: (username) => {
+                let users = DB.getUsers().filter(u => u.username !== username);
+                localStorage.setItem('cd_db_users', JSON.stringify(users));
+                let posts = DB.getPosts().filter(p => p.author !== username);
+                localStorage.setItem('cd_db_posts', JSON.stringify(posts));
+            }
+        };
+
+        // --- ESTADO ---
+        let session = JSON.parse(sessionStorage.getItem('cd_session')) || null;
+        let activeTab = 'feed';
+        let isAdminLogin = false;
+
+        window.onload = () => {
+            if (session) showDashboard();
+        };
+
+        window.toggleAdminMode = () => {
+            isAdminLogin = !isAdminLogin;
+            document.getElementById('user-fields').classList.toggle('hidden');
+            document.getElementById('admin-fields').classList.toggle('hidden');
+            document.getElementById('admin-toggle-btn').innerText = isAdminLogin ? 'VOLVER A USUARIO' : '¿ERES ADMIN?';
+            document.getElementById('auth-subtitle').innerText = isAdminLogin ? 'SISTEMA DE ADMINISTRACIÓN' : 'ACCESO AL TERMINAL';
+        };
+
+        // --- AUTENTICACIÓN MEJORADA ---
+        window.processAuth = async () => {
+            if (isAdminLogin) {
+                const nro = document.getElementById('admin-nro').value;
+                const clave = document.getElementById('admin-clave').value;
+                // Credenciales fijas según requerimiento anterior
+                if (nro === "593-EC.dev" && clave === "24865139") {
+                    session = { username: 'Admin_Master', role: 'admin' };
+                    sessionStorage.setItem('cd_session', JSON.stringify(session));
+                    showDashboard();
+                } else {
+                    alert('Credenciales de administrador inválidas.');
+                }
+            } else {
+                const user = document.getElementById('reg-user').value.trim();
+                const pass = document.getElementById('reg-pass').value;
+
+                // Validaciones solicitadas
+                if (user.includes(' ')) return alert('El nombre de usuario no puede contener espacios.');
+                if (user.length < 3) return alert('El usuario debe tener al menos 3 caracteres.');
+                if (pass.length < 6) return alert('La contraseña debe tener al menos 6 caracteres.');
+
+                const users = DB.getUsers();
+                const existingUser = users.find(u => u.username === user);
+
+                if (existingUser) {
+                    if (existingUser.password === pass) {
+                        session = { username: user, role: 'user' };
+                        sessionStorage.setItem('cd_session', JSON.stringify(session));
+                        showDashboard();
+                    } else {
+                        alert('Contraseña incorrecta.');
+                    }
+                } else {
+                    // Nuevo Registro
+                    session = { username: user, role: 'user', password: pass };
+                    DB.saveUser(session);
+                    sessionStorage.setItem('cd_session', JSON.stringify(session));
+                    showDashboard();
+                }
+            }
+        };
+
+        function showDashboard() {
+            document.getElementById('view-auth').classList.add('hidden');
+            document.getElementById('view-dashboard').classList.remove('hidden');
+            
+            document.getElementById('badge-name').innerText = session.username;
+            document.getElementById('badge-role').innerText = session.role;
+            document.getElementById('badge-avatar').innerText = session.username[0];
+            
+            activeTab = (session.role === 'admin') ? 'admin-panel' : 'feed';
+            renderNav();
+            renderContent();
+        }
+
+        window.logout = () => {
+            sessionStorage.removeItem('cd_session');
+            location.reload();
+        };
+
+        // --- NAVEGACIÓN ---
+        function renderNav() {
+            const nav = document.getElementById('main-nav');
+            const items = session.role === 'admin' ? [
+                { id: 'admin-panel', icon: 'fa-shield-halved', label: 'Gestión Usuarios' }
+            ] : [
+                { id: 'feed', icon: 'fa-house', label: 'Feed' }
+            ];
+
+            nav.innerHTML = items.map(item => `
+                <button onclick="switchTab('${item.id}')" class="nav-item w-full flex items-center gap-4 p-4 rounded-2xl transition-all ${activeTab === item.id ? 'active' : 'text-gray-500 hover:text-white'}">
+                    <i class="fas ${item.icon} w-5 text-sm"></i>
+                    <span class="hidden md:block font-black text-[10px] uppercase tracking-widest">${item.label}</span>
+                </button>
+            `).join('');
+        }
+
+        window.switchTab = (id) => {
+            activeTab = id;
+            renderNav();
+            renderContent();
+        };
+
+        // --- CONTENIDO ---
+        function renderContent() {
+            const main = document.getElementById('main-content');
+            main.innerHTML = '';
+            
+            if (activeTab === 'feed') {
+                main.innerHTML = `
+                    <div class="max-w-2xl mx-auto space-y-8 animate-fade">
+                        <h2 class="text-3xl font-black italic">COMUNIDAD</h2>
+                        <div class="glass p-8 rounded-[2rem] border-white/5">
+                            <textarea id="post-text" placeholder="¿Qué estás construyendo hoy?" class="w-full bg-transparent border-none resize-none text-lg mb-6 focus:ring-0" rows="3"></textarea>
+                            <div class="flex justify-end pt-4 border-t border-white/5">
+                                <button onclick="handlePublish()" class="btn-gradient px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest">Publicar</button>
+                            </div>
+                        </div>
+                        <div id="posts-container" class="space-y-6"></div>
+                    </div>
+                `;
+                renderPosts();
+            }
+
+            if (activeTab === 'admin-panel') {
+                const users = DB.getUsers();
+                main.innerHTML = `
+                    <div class="max-w-5xl mx-auto animate-fade">
+                        <div class="flex justify-between items-end mb-10">
+                            <div>
+                                <h2 class="text-4xl font-black italic">ADMIN PANEL</h2>
+                                <p class="text-blue-500 text-[10px] font-black uppercase tracking-[0.3em]">Usuarios Reales en Sistema</p>
+                            </div>
+                            <div class="text-right glass px-6 py-2 rounded-2xl">
+                                <span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Total</span>
+                                <p class="text-xl font-black">${users.length}</p>
+                            </div>
+                        </div>
+
+                        <div class="glass rounded-[2.5rem] overflow-hidden border-white/5">
+                            <table class="w-full text-left">
+                                <thead class="bg-white/5 border-b border-white/5 text-gray-500 text-[10px] font-black uppercase tracking-widest">
+                                    <tr>
+                                        <th class="p-6">Identidad</th>
+                                        <th class="p-6">Fecha Registro</th>
+                                        <th class="p-6 text-right">Control</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-white/5">
+                                    ${users.map(u => `
+                                        <tr class="hover:bg-white/[0.02]">
+                                            <td class="p-6 flex items-center gap-4">
+                                                <div class="w-10 h-10 rounded-2xl bg-blue-600/20 flex items-center justify-center font-black text-blue-500 border border-blue-500/20 uppercase">${u.username[0]}</div>
+                                                <span class="font-bold text-sm text-white">${u.username}</span>
+                                            </td>
+                                            <td class="p-6 text-xs text-gray-500 font-mono">${u.registeredAt.split('T')[0]}</td>
+                                            <td class="p-6 text-right">
+                                                <button onclick="deleteUser('${u.username}')" class="text-red-500 hover:bg-red-500/10 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Banear</button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                            ${users.length === 0 ? '<div class="p-20 text-center text-gray-600 uppercase text-xs font-black tracking-widest">No hay registros</div>' : ''}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // --- LÓGICA DE PUBLICACIONES ---
+        window.handlePublish = () => {
+            const txt = document.getElementById('post-text').value.trim();
+            if (!txt) return;
+
+            const post = {
+                id: Date.now(),
+                author: session.username,
+                content: txt,
+                timestamp: new Date().toISOString()
+            };
+
+            DB.savePost(post);
+            renderContent();
+        };
+
+        function renderPosts() {
+            const container = document.getElementById('posts-container');
+            const posts = DB.getPosts();
+            container.innerHTML = posts.map(p => `
+                <div class="glass p-8 rounded-[2rem] post-card border-white/5">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white text-xs uppercase">${p.author[0]}</div>
+                        <div>
+                            <p class="font-bold text-sm">${p.author}</p>
+                            <p class="text-[9px] text-gray-500 uppercase tracking-widest">${new Date(p.timestamp).toLocaleTimeString()}</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">${p.content}</p>
+                </div>
+            `).join('');
+        }
+
+        // --- ACCIONES DE ADMIN ---
+        window.deleteUser = (username) => {
+            if (confirm(`¿Eliminar permanentemente a ${username} y sus publicaciones?`)) {
+                DB.banUser(username);
+                renderContent();
+            }
+        };
+
+    </script>
+</body>
+</html>
