@@ -226,8 +226,8 @@
 
         window.processAuth = () => {
             if(isAdminLogin) {
-                const nro = document.getElementById('admin-nro').value;
-                const clave = document.getElementById('admin-clave').value;
+                const nro = document.getElementById('admin-nro').value.trim();
+                const clave = document.getElementById('admin-clave').value.trim();
                 if(nro === "593-EC.dev" && clave === "24865139") {
                     session = { username: 'Admin_Master', role: 'admin' };
                     sessionStorage.setItem('cd_session', JSON.stringify(session));
@@ -235,7 +235,7 @@
                 } else alert('Error: Credenciales administrativas inválidas.');
             } else {
                 const u = document.getElementById('reg-user').value.trim();
-                const p = document.getElementById('reg-pass').value;
+                const p = document.getElementById('reg-pass').value.trim();
                 const name = document.getElementById('reg-fullname').value.trim();
                 
                 if(!u || !p) return alert('Completa todos los campos.');
@@ -316,7 +316,7 @@
                         <div class="flex items-center gap-4 mb-4 cursor-pointer" onclick="viewProfile('${p.author}')">
                             <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black bg-cover bg-center" style="${author?.avatar ? `background-image:url(${author.avatar})`:''}">${author?.avatar ? '':p.author[0]}</div>
                             <div>
-                                <span class="font-bold text-sm block flex items-center">${p.author}${author?.isVerified ? '<span class="verified-badge"><i class="fas fa-hammer"></i></span>':''}</span>
+                                <span class="font-bold text-sm block flex items-center">${p.author}${author?.isVerified ? '<span class="verified-badge"><i class="fas fa-check-double"></i></span>':''}</span>
                                 <span class="text-[9px] text-gray-500 uppercase font-black">${author?.realName || 'Dev'}</span>
                             </div>
                         </div>
@@ -349,12 +349,12 @@
                                     <td class="p-6">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-black bg-cover bg-center" style="${u.avatar ? `background-image:url(${u.avatar})`:''}">${u.avatar ? '':u.username[0]}</div>
-                                            <span class="font-bold text-sm flex items-center">${u.username}${u.isVerified ? '<span class="verified-badge"><i class="fas fa-hammer"></i></span>':''}</span>
+                                            <span class="font-bold text-sm flex items-center">${u.username}${u.isVerified ? '<span class="verified-badge"><i class="fas fa-check-double"></i></span>':''}</span>
                                         </div>
                                     </td>
                                     <td class="p-6"><span class="text-[9px] font-black uppercase ${u.status === 'active' ? 'text-green-500':'text-red-500'}">${u.status}</span></td>
                                     <td class="p-6 text-right space-x-2">
-                                        <button onclick="toggleVerify('${u.username}')" class="w-8 h-8 rounded-lg ${u.isVerified ? 'bg-blue-600':'bg-white/10'}"><i class="fas fa-hammer text-[10px]"></i></button>
+                                        <button onclick="toggleVerify('${u.username}')" class="w-8 h-8 rounded-lg ${u.isVerified ? 'bg-blue-600':'bg-white/10'}"><i class="fas fa-check-double text-[10px]"></i></button>
                                         <button onclick="ban('${u.username}')" class="w-8 h-8 rounded-lg bg-red-500/20 text-red-500"><i class="fas fa-ban text-[10px]"></i></button>
                                     </td>
                                 </tr>
@@ -369,7 +369,10 @@
 
         window.viewProfile = (username) => {
             const users = DB.getUsers();
-            const u = users.find(x => x.username === username);
+            let u = users.find(x => x.username === username);
+            if(!u && username === 'Admin_Master') {
+                u = { username: 'Admin_Master', realName: 'System Administrator', isVerified: true, avatar: null, followers: [] };
+            }
             if(!u) return;
             const isMe = session.username === username;
             const posts = DB.getPosts().filter(p => p.author === username);
@@ -378,7 +381,7 @@
                 <div class="max-w-2xl mx-auto py-10 px-4 animate-fade">
                     <div class="glass p-12 rounded-[3.5rem] text-center mb-10">
                         <div class="w-32 h-32 rounded-full bg-blue-600 mx-auto mb-6 bg-cover bg-center flex items-center justify-center text-4xl font-black" style="${u.avatar ? `background-image:url(${u.avatar})`:''}">${u.avatar ? '':u.username[0]}</div>
-                        <h2 class="text-3xl font-black italic flex items-center justify-center">${u.username}${u.isVerified ? '<span class="verified-badge" style="width:18px;height:18px;font-size:9px"><i class="fas fa-hammer"></i></span>':''}</h2>
+                        <h2 class="text-3xl font-black italic flex items-center justify-center">${u.username}${u.isVerified ? '<span class="verified-badge" style="width:18px;height:18px;font-size:9px"><i class="fas fa-check-double"></i></span>':''}</h2>
                         <p class="text-xs text-gray-500 uppercase font-black tracking-widest mt-1">${u.realName || 'Sin nombre'}</p>
                         <div class="flex justify-center gap-10 my-8">
                             <div><p class="text-xl font-black">${posts.length}</p><p class="text-[8px] uppercase text-gray-500 font-black">Posts</p></div>
@@ -405,7 +408,7 @@
                 <div onclick="viewProfile('${u.username}')" class="glass p-4 rounded-2xl flex items-center gap-4 cursor-pointer hover:bg-white/5">
                     <div class="w-10 h-10 rounded-full bg-blue-600 bg-cover bg-center flex items-center justify-center font-black" style="${u.avatar ? `background-image:url(${u.avatar})`:''}">${u.avatar ? '':u.username[0]}</div>
                     <div class="flex-1">
-                        <p class="text-sm font-bold flex items-center">${u.username}${u.isVerified ? '<span class="verified-badge"><i class="fas fa-hammer"></i></span>':''}</p>
+                        <p class="text-sm font-bold flex items-center">${u.username}${u.isVerified ? '<span class="verified-badge"><i class="fas fa-check-double"></i></span>':''}</p>
                         <p class="text-[8px] text-gray-500 font-black">${u.realName || ''}</p>
                     </div>
                     ${session.role === 'admin' ? `<button onclick="event.stopPropagation(); toggleVerify('${u.username}')" class="text-blue-500"><i class="fas fa-plus"></i></button>` : ''}
