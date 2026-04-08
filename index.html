@@ -3,128 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Developer | Ultimate Platform</title>
+    <title>Code Developer | Next Gen Social</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
-
-        :root {
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --accent: #3b82f6;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #020202;
-            color: #f3f4f6;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        .glass {
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--glass-border);
-        }
-
-        .liquid-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 90% 90%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
-        }
-
+        :root { --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(255, 255, 255, 0.1); --accent: #3b82f6; }
+        body { font-family: 'Inter', sans-serif; background: #020202; color: #f3f4f6; margin: 0; overflow: hidden; }
+        .glass { background: var(--glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--glass-border); }
+        .liquid-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 90% 90%, rgba(139, 92, 246, 0.1) 0%, transparent 50%); }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-
-        .nav-item.active {
-            background: rgba(59, 130, 246, 0.1);
-            color: #3b82f6;
-            border-left: 4px solid #3b82f6;
-        }
-
-        .btn-gradient {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            transition: all 0.3s ease;
-        }
+        .nav-item.active { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-left: 4px solid #3b82f6; }
+        .btn-gradient { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); transition: all 0.3s ease; }
         .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
-
-        input, textarea, select {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: white;
-            transition: all 0.2s;
-        }
-        input:focus, textarea:focus { border-color: var(--accent); outline: none; background: rgba(255, 255, 255, 0.07); }
-
-        .animate-fade { animation: fadeIn 0.4s ease forwards; }
+        input, textarea, select { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); color: white; transition: all 0.2s; outline: none; }
+        input:focus { border-color: var(--accent); }
+        .animate-fade { animation: fadeIn 0.3s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .ban-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 9999;
-            display: flex; align-items: center; justify-content: center;
+        
+        .verified-badge { 
+            position: relative; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            width: 14px; 
+            height: 14px; 
+            background: #3b82f6; 
+            border-radius: 50%; 
+            color: white; 
+            font-size: 7px; 
+            margin-left: 4px;
+            vertical-align: middle;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
         }
+
+        .ban-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .chat-msg-me { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 1.5rem 1.5rem 0.2rem 1.5rem; }
+        .chat-msg-them { background: rgba(255,255,255,0.05); border-radius: 1.5rem 1.5rem 1.5rem 0.2rem; }
     </style>
 </head>
 <body class="custom-scrollbar">
     <div class="liquid-bg"></div>
 
-    <!-- PANTALLA DE BLOQUEO (BAN/SUSPENSIÓN) -->
+    <!-- PANTALLA DE BLOQUEO -->
     <div id="ban-screen" class="ban-overlay hidden animate-fade">
-        <div class="glass p-12 rounded-[3rem] max-w-lg w-full text-center border-red-500/30">
+        <div class="glass p-12 rounded-[3rem] max-w-lg w-full text-center">
             <i class="fas fa-gavel text-red-500 text-6xl mb-6"></i>
-            <h2 id="ban-title" class="text-3xl font-black italic mb-2">CUENTA RESTRINGIDA</h2>
+            <h2 id="ban-title" class="text-3xl font-black italic mb-2">ACCESO DENEGADO</h2>
             <p id="ban-message" class="text-gray-400 mb-6 text-sm"></p>
-            
-            <div id="suspension-timer" class="mb-8 hidden">
-                <p class="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-2">Tiempo restante</p>
-                <div class="text-4xl font-mono font-bold text-white tracking-tighter" id="timer-display">00:00:00</div>
-            </div>
-
-            <div id="appeal-section" class="space-y-4">
-                <p class="text-xs text-gray-500 italic">¿Consideras que esto es un error? Envía un mensaje al soporte.</p>
-                <div id="appeal-form" class="space-y-2">
-                    <textarea id="appeal-text" class="w-full rounded-2xl p-4 text-xs h-24" placeholder="Escribe tu apelación..."></textarea>
-                    <button onclick="sendAppeal()" id="btn-appeal" class="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
-                        Enviar Apelación (<span id="appeal-count">5</span> restantes)
-                    </button>
-                </div>
-            </div>
-            
-            <button onclick="logout()" class="mt-8 text-gray-600 hover:text-white text-[10px] font-black uppercase tracking-[0.3em]">Cerrar Sesión</button>
+            <button onclick="logout()" class="mt-8 text-gray-600 hover:text-white uppercase font-black text-[10px]">Volver al Inicio</button>
         </div>
     </div>
 
     <div id="app">
         <!-- AUTH -->
         <section id="view-auth" class="min-h-screen flex items-center justify-center p-6 animate-fade">
-            <div class="glass w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl border-white/5">
+            <div class="glass w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl">
                 <div class="text-center mb-10">
-                    <h1 class="text-4xl font-black tracking-tighter text-white mb-2 italic">CODE DEVELOPER</h1>
-                    <p class="text-gray-500 text-[10px] font-black tracking-[0.2em]" id="auth-subtitle">TERMINAL DE ACCESO</p>
+                    <h1 class="text-4xl font-black italic tracking-tighter">CODE DEVELOPER</h1>
+                    <p class="text-gray-500 text-[10px] font-black tracking-widest mt-2 uppercase" id="auth-mode-label">Terminal de Acceso</p>
                 </div>
-
+                
                 <div class="space-y-4">
                     <div id="user-fields" class="space-y-4">
-                        <input type="text" id="reg-user" class="w-full rounded-2xl px-5 py-4 text-sm" placeholder="Usuario (sin espacios)">
-                        <input type="password" id="reg-pass" class="w-full rounded-2xl px-5 py-4 text-sm" placeholder="Contraseña (mín. 6)">
+                        <div id="signup-extra-fields" class="hidden animate-fade">
+                            <input type="text" id="reg-fullname" class="w-full rounded-2xl px-5 py-4 text-sm" placeholder="Nombre Real">
+                        </div>
+                        <input type="text" id="reg-user" class="w-full rounded-2xl px-5 py-4 text-sm" placeholder="Nombre de Usuario">
+                        <input type="password" id="reg-pass" class="w-full rounded-2xl px-5 py-4 text-sm" placeholder="Contraseña">
                     </div>
 
                     <div id="admin-fields" class="hidden space-y-4">
-                        <div class="p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl">
-                            <p class="text-amber-500 text-[9px] font-black uppercase tracking-widest">Master Node Access</p>
-                        </div>
-                        <input type="text" id="admin-nro" class="w-full rounded-2xl px-5 py-4 text-sm" placeholder="Nro Credencial">
+                        <input type="text" id="admin-nro" class="w-full rounded-2xl px-5 py-4 text-sm" placeholder="Nro de Credencial">
                         <input type="password" id="admin-clave" class="w-full rounded-2xl px-5 py-4 text-sm" placeholder="Clave Maestra">
                     </div>
 
-                    <button onclick="processAuth()" class="w-full btn-gradient py-4 rounded-2xl font-bold text-sm tracking-widest mt-4">INGRESAR</button>
-
-                    <div class="pt-8 border-t border-white/5 text-center">
-                        <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-gray-500 text-[10px] hover:text-white uppercase tracking-[0.3em] font-black">¿MODO ADMIN?</button>
+                    <button onclick="processAuth()" id="auth-main-btn" class="w-full btn-gradient py-4 rounded-2xl font-bold uppercase tracking-widest text-xs mt-2">Ingresar al Sistema</button>
+                    
+                    <div class="flex flex-col gap-3 mt-6 pt-6 border-t border-white/5">
+                        <button onclick="toggleAuthMode()" id="auth-switch-btn" class="text-blue-500 text-[10px] font-black uppercase tracking-widest">¿No tienes cuenta? Regístrate</button>
+                        <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-gray-500 text-[10px] font-black uppercase tracking-widest">Acceso Administrativo</button>
                     </div>
                 </div>
             </div>
@@ -134,207 +93,199 @@
         <section id="view-dashboard" class="hidden h-screen flex">
             <!-- Sidebar -->
             <aside class="w-20 md:w-72 border-r border-white/5 flex flex-col bg-[#010101]">
-                <div class="p-8 mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-                            <i class="fas fa-bolt text-white text-xs"></i>
-                        </div>
-                        <span class="hidden md:block font-black text-lg italic">CODE DEV</span>
-                    </div>
+                <div class="p-8">
+                    <h2 class="font-black italic text-xl hidden md:block tracking-tighter">CODE DEV</h2>
                 </div>
-
                 <nav class="flex-1 px-4 space-y-2" id="main-nav"></nav>
+                <div class="p-6 border-t border-white/5 space-y-4">
+                    <button onclick="openChatInterface()" class="w-full flex items-center justify-center md:justify-start gap-4 p-4 text-gray-400 hover:text-white transition-all group">
+                        <i class="fas fa-paper-plane text-lg group-hover:scale-110 transition-transform"></i>
+                        <span class="hidden md:block font-black text-[10px] uppercase tracking-widest">Mensajes Directos</span>
+                    </button>
 
-                <div class="p-6 border-t border-white/5">
-                    <button onclick="switchTab('profile')" class="w-full mb-4 glass p-3 rounded-2xl flex items-center gap-3 hover:bg-white/5 transition-all text-left">
-                        <div id="badge-avatar" class="w-10 h-10 min-w-[40px] rounded-full bg-blue-600 flex items-center justify-center font-black text-white overflow-hidden bg-cover bg-center"></div>
-                        <div class="hidden md:block overflow-hidden">
+                    <button onclick="switchTab('profile')" class="w-full glass p-3 rounded-2xl flex items-center gap-3 hover:bg-white/5 transition-all">
+                        <div id="badge-avatar" class="w-10 h-10 min-w-[40px] rounded-full bg-blue-600 flex items-center justify-center font-black bg-cover bg-center overflow-hidden"></div>
+                        <div class="hidden md:block overflow-hidden text-left">
                             <p id="badge-name" class="text-xs font-black truncate"></p>
-                            <p class="text-[9px] text-blue-500 uppercase font-black">Mi Perfil</p>
+                            <p class="text-[8px] text-blue-500 font-bold uppercase">Mi Perfil</p>
                         </div>
                     </button>
-                    <button onclick="logout()" class="w-full flex items-center justify-center md:justify-start gap-4 p-4 text-gray-600 hover:text-red-400 rounded-2xl transition-all">
-                        <i class="fas fa-power-off"></i>
-                        <span class="hidden md:block font-bold text-[10px] uppercase tracking-widest">Logout</span>
+                    <button onclick="logout()" class="w-full text-center text-gray-600 hover:text-red-500 transition-all p-2">
+                        <i class="fas fa-sign-out-alt"></i>
                     </button>
                 </div>
             </aside>
 
-            <!-- Main -->
-            <main class="flex-1 overflow-y-auto custom-scrollbar bg-[#030303] relative" id="main-content"></main>
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto custom-scrollbar bg-[#030303]" id="main-content"></main>
         </section>
     </div>
 
+    <!-- CHAT INTERFACE OVERLAY -->
+    <div id="chat-overlay" class="fixed inset-0 bg-black/95 z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-5xl h-[85vh] rounded-[3rem] flex overflow-hidden border-white/10 shadow-2xl">
+            <div class="w-1/3 border-r border-white/5 flex flex-col bg-[#010101]/50">
+                <div class="p-8 border-b border-white/5 flex justify-between items-center">
+                    <h3 class="font-black text-xs uppercase tracking-[0.2em]">Bandeja de Entrada</h3>
+                    <button onclick="closeChat()"><i class="fas fa-times text-gray-500 hover:text-white"></i></button>
+                </div>
+                <div id="chat-list" class="flex-1 overflow-y-auto custom-scrollbar py-2"></div>
+            </div>
+            <div class="flex-1 flex flex-col relative">
+                <div id="chat-header" class="p-6 border-b border-white/5 flex items-center gap-4 bg-white/[0.02]">
+                    <div class="text-gray-500 italic text-xs">Selecciona un desarrollador para chatear</div>
+                </div>
+                <div id="chat-messages" class="flex-1 overflow-y-auto p-8 space-y-4 custom-scrollbar bg-[#020202]"></div>
+                <div id="chat-footer" class="p-6 border-t border-white/5 hidden bg-white/[0.02]">
+                    <div class="flex gap-4">
+                        <input type="text" id="chat-input" class="flex-1 rounded-2xl px-6 py-4 text-sm glass" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') sendMessage()">
+                        <button onclick="sendMessage()" class="w-14 h-14 btn-gradient rounded-full flex items-center justify-center">
+                            <i class="fas fa-paper-plane text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- BASE DE DATOS LOCAL ---
+        // --- BASE DE DATOS ---
         const DB = {
-            getUsers: () => JSON.parse(localStorage.getItem('cd_v3_users')) || [],
-            saveUser: (user) => {
+            getUsers: () => JSON.parse(localStorage.getItem('cd_v4_users')) || [],
+            saveUser: (u) => {
                 const users = DB.getUsers();
-                const idx = users.findIndex(u => u.username === user.username);
-                if (idx > -1) users[idx] = { ...users[idx], ...user };
-                else users.push({ ...user, registeredAt: new Date().toISOString(), status: 'active', appeals: 5, avatar: null });
-                localStorage.setItem('cd_v3_users', JSON.stringify(users));
-            },
-            getPosts: () => JSON.parse(localStorage.getItem('cd_v3_posts')) || [],
-            savePost: (post) => {
-                const posts = DB.getPosts();
-                posts.unshift(post);
-                localStorage.setItem('cd_v3_posts', JSON.stringify(posts));
-            },
-            updateUserStatus: (username, status, duration = null) => {
-                const users = DB.getUsers();
-                const user = users.find(u => u.username === username);
-                if (user) {
-                    user.status = status;
-                    user.banUntil = duration ? Date.now() + duration : null;
-                    localStorage.setItem('cd_v3_users', JSON.stringify(users));
-                    window.dispatchEvent(new Event('storage')); // Notificar a otras pestañas
+                const i = users.findIndex(x => x.username === u.username);
+                if(i > -1) {
+                    users[i] = { ...users[i], ...u };
+                } else {
+                    users.push({
+                        ...u,
+                        registeredAt: new Date().toISOString(),
+                        status: 'active',
+                        isVerified: false,
+                        followers: [],
+                        following: [],
+                        avatar: null
+                    });
                 }
+                localStorage.setItem('cd_v4_users', JSON.stringify(users));
+            },
+            getPosts: () => JSON.parse(localStorage.getItem('cd_v4_posts')) || [],
+            savePost: (p) => { 
+                const posts = DB.getPosts(); 
+                posts.unshift(p); 
+                localStorage.setItem('cd_v4_posts', JSON.stringify(posts)); 
+            },
+            getMessages: () => JSON.parse(localStorage.getItem('cd_v4_chats')) || [],
+            saveMessage: (msg) => { 
+                const chats = DB.getMessages(); 
+                chats.push(msg); 
+                localStorage.setItem('cd_v4_chats', JSON.stringify(chats)); 
             }
         };
 
         // --- ESTADO ---
         let session = JSON.parse(sessionStorage.getItem('cd_session')) || null;
         let activeTab = 'feed';
+        let currentChatUser = null;
         let isAdminLogin = false;
-        let timerInterval = null;
+        let isSignupMode = false;
 
-        window.onload = () => {
-            if (session) checkStatusAndShow();
-        };
-
-        // Sincronización en tiempo real de baneo
-        window.addEventListener('storage', () => {
-            if (session) checkStatusAndShow();
-        });
+        window.onload = () => { if(session) checkStatusAndShow(); };
 
         function checkStatusAndShow() {
             const users = DB.getUsers();
-            const user = users.find(u => u.username === session.username);
+            const u = users.find(x => x.username === session.username);
             
-            if (user && user.status !== 'active' && session.role !== 'admin') {
-                showBanScreen(user);
-            } else {
-                document.getElementById('ban-screen').classList.add('hidden');
-                showDashboard();
-            }
-        }
-
-        function showBanScreen(user) {
-            document.getElementById('app').classList.add('hidden');
-            const screen = document.getElementById('ban-screen');
-            screen.classList.remove('hidden');
-            
-            const title = document.getElementById('ban-title');
-            const msg = document.getElementById('ban-message');
-            const timerDiv = document.getElementById('suspension-timer');
-            const appealCount = document.getElementById('appeal-count');
-
-            appealCount.innerText = user.appeals || 0;
-
-            if (user.status === 'banned') {
-                title.innerText = "BANEO PERMANENTE";
-                msg.innerText = "Tu cuenta ha sido expulsada de la red por infringir las normas de seguridad.";
-                timerDiv.classList.add('hidden');
-            } else {
-                title.innerText = "CUENTA SUSPENDIDA";
-                msg.innerText = "Has sido suspendido temporalmente. Espera a que el tiempo expire.";
-                timerDiv.classList.remove('hidden');
-                startTimer(user.banUntil);
-            }
-        }
-
-        function startTimer(endTime) {
-            if (timerInterval) clearInterval(timerInterval);
-            const display = document.getElementById('timer-display');
-            
-            timerInterval = setInterval(() => {
-                const now = Date.now();
-                const diff = endTime - now;
-
-                if (diff <= 0) {
-                    clearInterval(timerInterval);
-                    DB.updateUserStatus(session.username, 'active');
-                    location.reload();
+            // Bypass para Admin o validación de usuario activo
+            if(session.role !== 'admin') {
+                if(!u || u.status !== 'active') {
+                    document.getElementById('app').classList.add('hidden');
+                    document.getElementById('ban-screen').classList.remove('hidden');
+                    document.getElementById('ban-message').innerText = "Tu cuenta no está activa o ha sido restringida.";
                     return;
                 }
-
-                const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
-                const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-                const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-                display.innerText = `${h}:${m}:${s}`;
-            }, 1000);
+            }
+            showDashboard();
         }
+
+        window.toggleAuthMode = () => {
+            isSignupMode = !isSignupMode;
+            document.getElementById('signup-extra-fields').classList.toggle('hidden');
+            document.getElementById('auth-mode-label').innerText = isSignupMode ? "Registro de Terminal" : "Terminal de Acceso";
+            document.getElementById('auth-main-btn').innerText = isSignupMode ? "Crear Cuenta" : "Ingresar al Sistema";
+            document.getElementById('auth-switch-btn').innerText = isSignupMode ? "¿Ya tienes cuenta? Login" : "¿No tienes cuenta? Regístrate";
+        };
 
         window.toggleAdminMode = () => {
             isAdminLogin = !isAdminLogin;
             document.getElementById('user-fields').classList.toggle('hidden');
             document.getElementById('admin-fields').classList.toggle('hidden');
-            document.getElementById('admin-toggle-btn').innerText = isAdminLogin ? 'MODO USUARIO' : '¿MODO ADMIN?';
+            document.getElementById('admin-toggle-btn').innerText = isAdminLogin ? "Volver a Usuario" : "Acceso Administrativo";
         };
 
         window.processAuth = () => {
-            if (isAdminLogin) {
+            if(isAdminLogin) {
                 const nro = document.getElementById('admin-nro').value;
                 const clave = document.getElementById('admin-clave').value;
-                if (nro === "593-EC.dev" && clave === "24865139") {
+                if(nro === "593-EC.dev" && clave === "24865139") {
                     session = { username: 'Admin_Master', role: 'admin' };
                     sessionStorage.setItem('cd_session', JSON.stringify(session));
-                    checkStatusAndShow();
-                } else alert('Credenciales inválidas');
+                    location.reload();
+                } else alert('Error: Credenciales administrativas inválidas.');
             } else {
-                const user = document.getElementById('reg-user').value.trim();
-                const pass = document.getElementById('reg-pass').value;
-                if (user.includes(' ') || user.length < 3 || pass.length < 6) return alert('Valida tus datos: Usuario sin espacios y Clave min 6');
+                const u = document.getElementById('reg-user').value.trim();
+                const p = document.getElementById('reg-pass').value;
+                const name = document.getElementById('reg-fullname').value.trim();
                 
+                if(!u || !p) return alert('Completa todos los campos.');
+
                 const users = DB.getUsers();
-                const u = users.find(x => x.username === user);
-                if (u && u.password !== pass) return alert('Password incorrecta');
-                
-                session = { username: user, role: 'user' };
-                if (!u) DB.saveUser({ username: user, password: pass });
-                sessionStorage.setItem('cd_session', JSON.stringify(session));
-                checkStatusAndShow();
+                const userExists = users.find(x => x.username === u);
+
+                if(isSignupMode) {
+                    if(userExists) return alert('Usuario ya existe.');
+                    if(!name) return alert('Ingresa tu nombre real.');
+                    DB.saveUser({username: u, password: p, realName: name});
+                    alert('¡Registro exitoso! Ahora inicia sesión.');
+                    toggleAuthMode();
+                } else {
+                    if(!userExists || userExists.password !== p) return alert('Usuario o contraseña incorrectos.');
+                    session = { username: u, role: 'user' };
+                    sessionStorage.setItem('cd_session', JSON.stringify(session));
+                    location.reload();
+                }
             }
         };
 
         function showDashboard() {
-            document.getElementById('app').classList.remove('hidden');
             document.getElementById('view-auth').classList.add('hidden');
             document.getElementById('view-dashboard').classList.remove('hidden');
-            
             const users = DB.getUsers();
-            const me = users.find(u => u.username === session.username) || session;
+            const me = users.find(x => x.username === session.username) || session;
             
             document.getElementById('badge-name').innerText = me.username;
-            const avatar = document.getElementById('badge-avatar');
-            if (me.avatar) {
-                avatar.style.backgroundImage = `url(${me.avatar})`;
-                avatar.innerText = "";
-            } else {
-                avatar.style.backgroundImage = "none";
-                avatar.innerText = me.username[0].toUpperCase();
+            const av = document.getElementById('badge-avatar');
+            if(me.avatar) { 
+                av.style.backgroundImage = `url(${me.avatar})`; 
+                av.innerText = ""; 
+            } else { 
+                av.innerText = me.username[0].toUpperCase(); 
+                av.style.backgroundImage = "none";
             }
-
             renderNav();
             renderContent();
         }
 
-        window.logout = () => { sessionStorage.removeItem('cd_session'); location.reload(); };
-
         function renderNav() {
             const nav = document.getElementById('main-nav');
-            const items = [
-                { id: 'feed', icon: 'fa-layer-group', label: 'Feed Principal' },
-                { id: 'search', icon: 'fa-search', label: 'Buscar Usuarios' }
-            ];
-            if (session.role === 'admin') items.push({ id: 'admin', icon: 'fa-shield-halved', label: 'Moderación' });
-
-            nav.innerHTML = items.map(item => `
-                <button onclick="switchTab('${item.id}')" class="nav-item w-full flex items-center gap-4 p-4 rounded-2xl transition-all ${activeTab === item.id ? 'active' : 'text-gray-500 hover:text-white'}">
-                    <i class="fas ${item.icon} w-5 text-sm"></i>
-                    <span class="hidden md:block font-black text-[10px] uppercase tracking-widest">${item.label}</span>
+            const items = [{id:'feed', icon:'fa-home', label:'Inicio'}, {id:'search', icon:'fa-search', label:'Explorar'}];
+            if(session.role === 'admin') items.push({id:'admin', icon:'fa-shield-halved', label:'Admin'});
+            
+            nav.innerHTML = items.map(i => `
+                <button onclick="switchTab('${i.id}')" class="nav-item w-full flex items-center gap-4 p-4 rounded-2xl transition-all ${activeTab === i.id ? 'active' : 'text-gray-500 hover:text-white'}">
+                    <i class="fas ${i.icon} w-5"></i>
+                    <span class="hidden md:block font-black text-[10px] uppercase tracking-widest">${i.label}</span>
                 </button>
             `).join('');
         }
@@ -343,227 +294,191 @@
 
         function renderContent() {
             const main = document.getElementById('main-content');
-            main.className = "flex-1 overflow-y-auto custom-scrollbar bg-[#030303] p-8 animate-fade";
-
-            if (activeTab === 'feed') {
-                main.innerHTML = `
-                    <div class="max-w-2xl mx-auto space-y-8">
-                        <h2 class="text-3xl font-black italic">COMUNIDAD</h2>
-                        <div class="glass p-8 rounded-[2rem] border-white/5">
-                            <textarea id="post-input" placeholder="¿Qué hay de nuevo, ${session.username}?" class="w-full bg-transparent border-none resize-none text-lg mb-6 focus:ring-0" rows="3"></textarea>
-                            <div class="flex justify-end pt-4 border-t border-white/5">
-                                <button onclick="publish()" class="btn-gradient px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest">Publicar</button>
-                            </div>
-                        </div>
-                        <div id="posts-container" class="space-y-6"></div>
-                    </div>
-                `;
-                loadPosts();
-            }
-
-            if (activeTab === 'search') {
-                main.innerHTML = `
-                    <div class="max-w-2xl mx-auto space-y-8">
-                        <h2 class="text-3xl font-black italic">DESCUBRIR</h2>
-                        <div class="relative">
-                            <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                            <input type="text" oninput="searchUsers(this.value)" class="w-full rounded-[2rem] pl-16 pr-6 py-5 glass" placeholder="Escribe un nombre de usuario...">
-                        </div>
-                        <div id="search-results" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-                    </div>
-                `;
-            }
-
-            if (activeTab === 'profile') {
-                const u = DB.getUsers().find(x => x.username === session.username) || session;
-                main.innerHTML = `
-                    <div class="max-w-xl mx-auto space-y-8">
-                        <h2 class="text-3xl font-black italic text-center">PERSONALIZAR PERFIL</h2>
-                        <div class="glass p-10 rounded-[3rem] text-center">
-                            <div class="relative w-32 h-32 mx-auto mb-8">
-                                <div id="profile-preview" class="w-full h-full rounded-full bg-blue-600 flex items-center justify-center text-4xl font-black bg-cover bg-center overflow-hidden" style="${u.avatar ? `background-image:url(${u.avatar})` : ''}">${u.avatar ? '' : u.username[0].toUpperCase()}</div>
-                                <label class="absolute bottom-0 right-0 bg-blue-600 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-all border-4 border-[#030303]">
-                                    <i class="fas fa-camera text-xs"></i>
-                                    <input type="file" class="hidden" onchange="uploadAvatar(this)">
-                                </label>
-                            </div>
-                            <div class="space-y-4 text-left">
-                                <div class="space-y-1">
-                                    <label class="text-[10px] text-gray-600 font-black uppercase ml-1">Nuevo Usuario</label>
-                                    <input type="text" id="p-user" value="${u.username}" class="w-full rounded-2xl px-5 py-4">
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="text-[10px] text-gray-600 font-black uppercase ml-1">Nueva Clave (Mín. 6)</label>
-                                    <input type="password" id="p-pass" placeholder="••••••••" class="w-full rounded-2xl px-5 py-4">
-                                </div>
-                                <button onclick="saveProfile()" class="w-full btn-gradient py-4 rounded-2xl font-black text-xs uppercase tracking-widest mt-6">Guardar Cambios</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            if (activeTab === 'admin') {
-                const users = DB.getUsers();
-                main.innerHTML = `
-                    <div class="max-w-5xl mx-auto space-y-10">
-                        <h2 class="text-3xl font-black italic">PANEL DE MODERACIÓN</h2>
-                        <div class="glass rounded-[2rem] overflow-hidden">
-                            <table class="w-full text-left">
-                                <thead class="bg-white/5 text-[10px] font-black uppercase text-gray-500">
-                                    <tr>
-                                        <th class="p-6">Usuario</th>
-                                        <th class="p-6">Estado Actual</th>
-                                        <th class="p-6 text-right">Protocolos de Control</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-white/5">
-                                    ${users.map(u => `
-                                        <tr class="hover:bg-white/[0.02]">
-                                            <td class="p-6">
-                                                <p class="font-bold text-sm">${u.username}</p>
-                                                <p class="text-[9px] text-gray-600 font-mono">${u.registeredAt.split('T')[0]}</p>
-                                            </td>
-                                            <td class="p-6">
-                                                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase ${u.status === 'active' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}">${u.status}</span>
-                                            </td>
-                                            <td class="p-6 text-right space-x-2">
-                                                <select onchange="suspendUser('${u.username}', this.value)" class="bg-white/5 rounded-xl px-3 py-2 text-[10px] font-black uppercase">
-                                                    <option value="">Suspender...</option>
-                                                    <option value="300000">5 Min</option>
-                                                    <option value="3600000">1 Hora</option>
-                                                    <option value="86400000">1 Día</option>
-                                                    <option value="2592000000">30 Días</option>
-                                                </select>
-                                                <button onclick="banPermanent('${u.username}')" class="text-red-500 bg-red-500/10 px-4 py-2 rounded-xl text-[10px] font-black uppercase">Ban Permanente</button>
-                                                <button onclick="rehabilitate('${u.username}')" class="text-green-500 bg-green-500/10 px-4 py-2 rounded-xl text-[10px] font-black uppercase">Activar</button>
-                                            </td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        // --- FUNCIONES CORE ---
-        window.publish = () => {
-            const val = document.getElementById('post-input').value.trim();
-            if (!val) return;
-            DB.savePost({ id: Date.now(), author: session.username, content: val, timestamp: new Date().toISOString() });
-            renderContent();
-        };
-
-        function loadPosts() {
-            const cont = document.getElementById('posts-container');
-            cont.innerHTML = DB.getPosts().map(p => `
-                <div class="glass p-8 rounded-[2rem] border-white/5">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs uppercase">${p.author[0]}</div>
-                        <div><p class="font-bold text-sm">${p.author}</p><p class="text-[9px] text-gray-600 uppercase font-black">${new Date(p.timestamp).toLocaleTimeString()}</p></div>
-                    </div>
-                    <p class="text-gray-300 text-sm leading-relaxed">${p.content}</p>
-                </div>
-            `).join('');
-        }
-
-        window.searchUsers = (query) => {
-            const results = document.getElementById('search-results');
-            if (!query) return results.innerHTML = "";
-            const filtered = DB.getUsers().filter(u => u.username.toLowerCase().includes(query.toLowerCase()));
-            results.innerHTML = filtered.map(u => `
-                <div class="glass p-6 rounded-2xl flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center font-black bg-cover bg-center" style="${u.avatar ? `background-image:url(${u.avatar})` : ''}">${u.avatar ? '' : u.username[0].toUpperCase()}</div>
-                    <div><p class="font-bold text-sm">${u.username}</p><p class="text-[9px] text-gray-500 uppercase">Miembro desde ${u.registeredAt.split('T')[0]}</p></div>
-                </div>
-            `).join('');
-        };
-
-        window.uploadAvatar = (input) => {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const preview = document.getElementById('profile-preview');
-                preview.style.backgroundImage = `url(${e.target.result})`;
-                preview.innerText = "";
-                preview.dataset.temp = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        };
-
-        window.saveProfile = () => {
-            const newUser = document.getElementById('p-user').value.trim();
-            const newPass = document.getElementById('p-pass').value;
-            const avatar = document.getElementById('profile-preview').dataset.temp;
-            
-            if (newUser.includes(' ') || newUser.length < 3) return alert('Usuario inválido');
-            
+            main.innerHTML = "";
             const users = DB.getUsers();
-            const u = users.find(x => x.username === session.username);
-            
-            const updated = { ...u, username: newUser };
-            if (newPass.length >= 6) updated.password = newPass;
-            if (avatar) updated.avatar = avatar;
 
-            // Actualizar posts anteriores si cambia nombre
-            if (newUser !== session.username) {
+            if(activeTab === 'feed') {
+                main.innerHTML = `<div class="max-w-xl mx-auto py-10 space-y-8 px-4">
+                    <h2 class="text-3xl font-black italic">FEED</h2>
+                    <div class="glass p-8 rounded-[2.5rem]">
+                        <textarea id="p-text" class="w-full bg-transparent border-none text-base h-24 focus:ring-0 resize-none" placeholder="¿Qué estás programando hoy?"></textarea>
+                        <div class="flex justify-end pt-4 border-t border-white/5">
+                            <button onclick="publish()" class="btn-gradient px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest">Publicar</button>
+                        </div>
+                    </div>
+                    <div id="feed-cont" class="space-y-6"></div>
+                </div>`;
                 const posts = DB.getPosts();
-                posts.forEach(p => { if (p.author === session.username) p.author = newUser; });
-                localStorage.setItem('cd_v3_posts', JSON.stringify(posts));
-                
-                // Actualizar DB de usuarios (borrar viejo, poner nuevo para evitar duplicado)
-                const otherUsers = users.filter(x => x.username !== session.username);
-                otherUsers.push(updated);
-                localStorage.setItem('cd_v3_users', JSON.stringify(otherUsers));
-            } else {
-                DB.saveUser(updated);
+                document.getElementById('feed-cont').innerHTML = posts.map(p => {
+                    const author = users.find(u => u.username === p.author);
+                    return `
+                    <div class="glass p-8 rounded-[2.5rem] animate-fade">
+                        <div class="flex items-center gap-4 mb-4 cursor-pointer" onclick="viewProfile('${p.author}')">
+                            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black bg-cover bg-center" style="${author?.avatar ? `background-image:url(${author.avatar})`:''}">${author?.avatar ? '':p.author[0]}</div>
+                            <div>
+                                <span class="font-bold text-sm block flex items-center">${p.author}${author?.isVerified ? '<span class="verified-badge"><i class="fas fa-hammer"></i></span>':''}</span>
+                                <span class="text-[9px] text-gray-500 uppercase font-black">${author?.realName || 'Dev'}</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-300 text-sm">${p.content}</p>
+                    </div>`;
+                }).join('');
             }
 
-            session.username = newUser;
-            sessionStorage.setItem('cd_session', JSON.stringify(session));
-            alert('Perfil actualizado correctamente');
-            showDashboard();
-        };
-
-        // --- MODERACIÓN ---
-        window.suspendUser = (username, duration) => {
-            if (!duration) return;
-            DB.updateUserStatus(username, 'suspended', parseInt(duration));
-            alert(`${username} suspendido.`);
-            renderContent();
-        };
-
-        window.banPermanent = (username) => {
-            if (confirm(`¿Banear permanentemente a ${username}?`)) {
-                DB.updateUserStatus(username, 'banned');
-                renderContent();
+            if(activeTab === 'search') {
+                main.innerHTML = `<div class="max-w-2xl mx-auto py-10 px-4">
+                    <h2 class="text-3xl font-black italic mb-8">BUSCAR</h2>
+                    <div class="relative mb-10">
+                        <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                        <input type="text" oninput="searchUsers(this.value)" class="w-full glass rounded-full pl-16 pr-8 py-5 text-sm" placeholder="Buscar desarrolladores...">
+                    </div>
+                    <div id="search-res" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>`;
             }
-        };
 
-        window.rehabilitate = (username) => {
-            DB.updateUserStatus(username, 'active');
-            alert(`${username} rehabilitado.`);
-            renderContent();
-        };
+            if(activeTab === 'admin') {
+                main.innerHTML = `<div class="p-10 max-w-5xl mx-auto space-y-10">
+                    <h2 class="text-3xl font-black italic">CONTROL</h2>
+                    <div class="glass rounded-[2.5rem] overflow-hidden">
+                        <table class="w-full text-left">
+                            <thead class="bg-white/5 text-[10px] font-black text-gray-500">
+                                <tr><th class="p-6">Usuario</th><th class="p-6">Estado</th><th class="p-6 text-right">Acciones</th></tr>
+                            </thead>
+                            <tbody>${users.map(u => `
+                                <tr class="border-t border-white/5">
+                                    <td class="p-6">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-black bg-cover bg-center" style="${u.avatar ? `background-image:url(${u.avatar})`:''}">${u.avatar ? '':u.username[0]}</div>
+                                            <span class="font-bold text-sm flex items-center">${u.username}${u.isVerified ? '<span class="verified-badge"><i class="fas fa-hammer"></i></span>':''}</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-6"><span class="text-[9px] font-black uppercase ${u.status === 'active' ? 'text-green-500':'text-red-500'}">${u.status}</span></td>
+                                    <td class="p-6 text-right space-x-2">
+                                        <button onclick="toggleVerify('${u.username}')" class="w-8 h-8 rounded-lg ${u.isVerified ? 'bg-blue-600':'bg-white/10'}"><i class="fas fa-hammer text-[10px]"></i></button>
+                                        <button onclick="ban('${u.username}')" class="w-8 h-8 rounded-lg bg-red-500/20 text-red-500"><i class="fas fa-ban text-[10px]"></i></button>
+                                    </td>
+                                </tr>
+                            `).join('')}</tbody>
+                        </table>
+                    </div>
+                </div>`;
+            }
 
-        window.sendAppeal = () => {
+            if(activeTab === 'profile') viewProfile(session.username);
+        }
+
+        window.viewProfile = (username) => {
             const users = DB.getUsers();
-            const u = users.find(x => x.username === session.username);
-            const txt = document.getElementById('appeal-text').value.trim();
-            
-            if (!txt) return;
-            if (u.appeals <= 0) return alert('No te quedan más intentos de apelación.');
-            
-            u.appeals--;
-            localStorage.setItem('cd_v3_users', JSON.stringify(users));
-            document.getElementById('appeal-count').innerText = u.appeals;
-            document.getElementById('appeal-text').value = "";
-            alert('Apelación enviada. El administrador revisará tu caso.');
+            const u = users.find(x => x.username === username);
+            if(!u) return;
+            const isMe = session.username === username;
+            const posts = DB.getPosts().filter(p => p.author === username);
+            activeTab = 'view_profile';
+            document.getElementById('main-content').innerHTML = `
+                <div class="max-w-2xl mx-auto py-10 px-4 animate-fade">
+                    <div class="glass p-12 rounded-[3.5rem] text-center mb-10">
+                        <div class="w-32 h-32 rounded-full bg-blue-600 mx-auto mb-6 bg-cover bg-center flex items-center justify-center text-4xl font-black" style="${u.avatar ? `background-image:url(${u.avatar})`:''}">${u.avatar ? '':u.username[0]}</div>
+                        <h2 class="text-3xl font-black italic flex items-center justify-center">${u.username}${u.isVerified ? '<span class="verified-badge" style="width:18px;height:18px;font-size:9px"><i class="fas fa-hammer"></i></span>':''}</h2>
+                        <p class="text-xs text-gray-500 uppercase font-black tracking-widest mt-1">${u.realName || 'Sin nombre'}</p>
+                        <div class="flex justify-center gap-10 my-8">
+                            <div><p class="text-xl font-black">${posts.length}</p><p class="text-[8px] uppercase text-gray-500 font-black">Posts</p></div>
+                            <div><p class="text-xl font-black">${u.followers?.length || 0}</p><p class="text-[8px] uppercase text-gray-500 font-black">Seguidores</p></div>
+                        </div>
+                        <div class="flex gap-4 justify-center">
+                            ${!isMe ? `
+                                <button onclick="alert('Siguiendo...')" class="btn-gradient px-8 py-3 rounded-xl text-[10px] font-black uppercase">Seguir</button>
+                                <button onclick="openChatInterface('${u.username}')" class="glass px-8 py-3 rounded-xl text-[10px] font-black uppercase">Mensaje</button>
+                            ` : `<button class="glass px-8 py-3 rounded-xl text-[10px] font-black uppercase">Editar Perfil</button>`}
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        ${posts.map(p => `<div class="glass p-6 rounded-2xl text-sm">${p.content}</div>`).join('')}
+                    </div>
+                </div>`;
         };
 
+        window.searchUsers = (q) => {
+            const res = document.getElementById('search-res');
+            if(!q) return res.innerHTML = "";
+            const filtered = DB.getUsers().filter(u => u.username.toLowerCase().includes(q.toLowerCase()));
+            res.innerHTML = filtered.map(u => `
+                <div onclick="viewProfile('${u.username}')" class="glass p-4 rounded-2xl flex items-center gap-4 cursor-pointer hover:bg-white/5">
+                    <div class="w-10 h-10 rounded-full bg-blue-600 bg-cover bg-center flex items-center justify-center font-black" style="${u.avatar ? `background-image:url(${u.avatar})`:''}">${u.avatar ? '':u.username[0]}</div>
+                    <div class="flex-1">
+                        <p class="text-sm font-bold flex items-center">${u.username}${u.isVerified ? '<span class="verified-badge"><i class="fas fa-hammer"></i></span>':''}</p>
+                        <p class="text-[8px] text-gray-500 font-black">${u.realName || ''}</p>
+                    </div>
+                    ${session.role === 'admin' ? `<button onclick="event.stopPropagation(); toggleVerify('${u.username}')" class="text-blue-500"><i class="fas fa-plus"></i></button>` : ''}
+                </div>`).join('');
+        };
+
+        window.openChatInterface = (target = null) => {
+            document.getElementById('chat-overlay').classList.remove('hidden');
+            if(target) selectChat(target);
+            renderChatList();
+        };
+        window.closeChat = () => document.getElementById('chat-overlay').classList.add('hidden');
+
+        function renderChatList() {
+            const list = document.getElementById('chat-list');
+            const users = DB.getUsers().filter(u => u.username !== session.username);
+            list.innerHTML = users.map(u => `
+                <div onclick="selectChat('${u.username}')" class="p-5 flex items-center gap-4 cursor-pointer ${currentChatUser === u.username ? 'bg-white/5':''}">
+                    <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black" style="${u.avatar ? `background-image:url(${u.avatar})`:''}">${u.avatar ? '':u.username[0]}</div>
+                    <p class="text-sm font-bold truncate">${u.username}</p>
+                </div>`).join('');
+        }
+
+        window.selectChat = (user) => { 
+            currentChatUser = user; 
+            renderChatList(); 
+            document.getElementById('chat-footer').classList.remove('hidden');
+            const target = DB.getUsers().find(u => u.username === user);
+            document.getElementById('chat-header').innerHTML = `<p class="font-black text-xs uppercase tracking-widest">${user}</p>`;
+            loadMessages(); 
+        };
+
+        function loadMessages() {
+            const cont = document.getElementById('chat-messages');
+            const msgs = DB.getMessages().filter(m => (m.from === session.username && m.to === currentChatUser) || (m.from === currentChatUser && m.to === session.username));
+            cont.innerHTML = msgs.map(m => `
+                <div class="flex ${m.from === session.username ? 'justify-end':'justify-start'} animate-fade">
+                    <div class="${m.from === session.username ? 'chat-msg-me':'chat-msg-them'} px-5 py-3 text-sm">
+                        ${m.text}
+                    </div>
+                </div>`).join('');
+            cont.scrollTop = cont.scrollHeight;
+        }
+
+        window.sendMessage = () => {
+            const inp = document.getElementById('chat-input');
+            if(!inp.value.trim()) return;
+            DB.saveMessage({ from: session.username, to: currentChatUser, text: inp.value.trim(), time: Date.now() });
+            inp.value = "";
+            loadMessages();
+        };
+
+        window.toggleVerify = (username) => {
+            const users = DB.getUsers();
+            const u = users.find(x => x.username === username);
+            if(u) { u.isVerified = !u.isVerified; localStorage.setItem('cd_v4_users', JSON.stringify(users)); renderContent(); }
+        };
+
+        window.ban = (username) => {
+            const users = DB.getUsers();
+            const u = users.find(x => x.username === username);
+            if(u) { u.status = 'banned'; localStorage.setItem('cd_v4_users', JSON.stringify(users)); renderContent(); }
+        };
+
+        window.publish = () => {
+            const txt = document.getElementById('p-text').value.trim();
+            if(!txt) return;
+            DB.savePost({author: session.username, content: txt, timestamp: Date.now()});
+            document.getElementById('p-text').value = "";
+            renderContent();
+        };
+
+        window.logout = () => { sessionStorage.clear(); location.reload(); };
     </script>
 </body>
 </html>
