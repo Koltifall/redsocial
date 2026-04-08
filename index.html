@@ -98,10 +98,12 @@
                 </div>
                 <nav class="flex-1 px-4 space-y-2" id="main-nav"></nav>
                 <div class="p-6 border-t border-white/5 space-y-4">
-                    <button onclick="openChatInterface()" class="w-full flex items-center justify-center md:justify-start gap-4 p-4 text-gray-400 hover:text-white transition-all group">
+                    <button onclick="openChatInterface()" class="w-full flex items-center justify-center md:justify-start gap-4 p-4 text-blue-500 hover:text-white transition-all group">
                         <i class="fas fa-paper-plane text-lg group-hover:scale-110 transition-transform"></i>
                         <span class="hidden md:block font-black text-[10px] uppercase tracking-widest">Mensajes Directos</span>
                     </button>
+
+                    <div class="h-px bg-white/5 my-2"></div>
 
                     <button onclick="switchTab('profile')" class="w-full glass p-3 rounded-2xl flex items-center gap-3 hover:bg-white/5 transition-all">
                         <div id="badge-avatar" class="w-10 h-10 min-w-[40px] rounded-full bg-blue-600 flex items-center justify-center font-black bg-cover bg-center overflow-hidden"></div>
@@ -136,7 +138,8 @@
                     <div class="text-gray-500 italic text-xs">Selecciona un desarrollador para chatear</div>
                 </div>
                 <div id="chat-messages" class="flex-1 overflow-y-auto p-8 space-y-4 custom-scrollbar bg-[#020202]"></div>
-                <div id="chat-footer" class="p-6 border-t border-white/5 hidden bg-white/[0.02]">
+                <div id="chat-footer" class="p-6 border-t border-white/5 hidden bg-white/[0.02] flex flex-col gap-4">
+                    <input type="text" id="chat-img" class="w-full rounded-xl px-4 py-2 text-[10px] glass italic" placeholder="URL de Foto (opcional)...">
                     <div class="flex gap-4">
                         <input type="text" id="chat-input" class="flex-1 rounded-2xl px-6 py-4 text-sm glass" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') sendMessage()">
                         <button onclick="sendMessage()" class="w-14 h-14 btn-gradient rounded-full flex items-center justify-center">
@@ -163,6 +166,7 @@
                         registeredAt: new Date().toISOString(),
                         status: 'active',
                         isVerified: false,
+                        verifyType: 'none',
                         followers: [],
                         following: [],
                         avatar: null
@@ -173,21 +177,52 @@
             getPosts: () => JSON.parse(localStorage.getItem('cd_v4_posts')) || [],
             savePost: (p) => { 
                 const posts = DB.getPosts(); 
-                posts.unshift(p); 
+                posts.unshift({
+                    ...p,
+                    id: 'post_' + Date.now(),
+                    likes: [],
+                    comments: [],
+                    image: p.image || null
+                });
                 localStorage.setItem('cd_v4_posts', JSON.stringify(posts)); 
+            },
+            updatePost: (p) => {
+                const posts = DB.getPosts();
+                const i = posts.findIndex(x => x.id === p.id);
+                if(i > -1) {
+                    posts[i] = p;
+                    localStorage.setItem('cd_v4_posts', JSON.stringify(posts));
+                }
             },
             getMessages: () => JSON.parse(localStorage.getItem('cd_v4_chats')) || [],
             saveMessage: (msg) => { 
                 const chats = DB.getMessages(); 
-                chats.push(msg); 
+                chats.push({
+                    ...msg,
+                    id: 'msg_' + Date.now(),
+                    image: msg.image || null
+                });
                 localStorage.setItem('cd_v4_chats', JSON.stringify(chats)); 
             }
         };
+
+        // --- HELPERS ---
+        function getBadgeHTML(u) {
+            if(!u) return "";
+            if(u.username === 'Admin_Master') return '<span class="verified-badge"><i class="fas fa-check"></i><i class="fas fa-star ml-0.5"></i></span>';
+            if(u.verifyType === 'common') return '<span class="verified-badge"><i class="fas fa-check"></i></span>';
+            if(u.verifyType === 'dev') return '<span class="verified-badge"><i class="fas fa-check"></i><i class="fas fa-hammer ml-0.5"></i></span>';
+            if(u.verifyType === 'admin') return '<span class="verified-badge"><i class="fas fa-check"></i><i class="fas fa-star ml-0.5"></i></span>';
+            // Fallback for legacy data
+            if(u.isVerified) return '<span class="verified-badge"><i class="fas fa-check"></i></span>';
+            return "";
+        }
 
         // --- ESTADO ---
         let session = JSON.parse(sessionStorage.getItem('cd_session')) || null;
         let activeTab = 'feed';
         let currentChatUser = null;
+        let currentProfileUser = null;
         let isAdminLogin = false;
         let isSignupMode = false;
 
@@ -300,8 +335,9 @@
             if(activeTab === 'feed') {
                 main.innerHTML = `<div class="max-w-xl mx-auto py-10 space-y-8 px-4">
                     <h2 class="text-3xl font-black italic">FEED</h2>
-                    <div class="glass p-8 rounded-[2.5rem]">
+                    <div class="glass p-8 rounded-[2.5rem] flex flex-col gap-4">
                         <textarea id="p-text" class="w-full bg-transparent border-none text-base h-24 focus:ring-0 resize-none" placeholder="¿Qué estás programando hoy?"></textarea>
+                        <input type="text" id="p-img" class="w-full rounded-xl px-4 py-2 text-[10px] glass italic" placeholder="URL de Imagen (opcional)...">
                         <div class="flex justify-end pt-4 border-t border-white/5">
                             <button onclick="publish()" class="btn-gradient px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest">Publicar</button>
                         </div>
@@ -309,20 +345,7 @@
                     <div id="feed-cont" class="space-y-6"></div>
                 </div>`;
                 const posts = DB.getPosts();
-                document.getElementById('feed-cont').innerHTML = posts.map(p => {
-                    const author = users.find(u => u.username === p.author);
-                    return `
-                    <div class="glass p-8 rounded-[2.5rem] animate-fade">
-                        <div class="flex items-center gap-4 mb-4 cursor-pointer" onclick="viewProfile('${p.author}')">
-                            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black bg-cover bg-center" style="${author?.avatar ? `background-image:url(${author.avatar})`:''}">${author?.avatar ? '':p.author[0]}</div>
-                            <div>
-                                <span class="font-bold text-sm block flex items-center">${p.author}${author?.isVerified ? '<span class="verified-badge"><i class="fas fa-check-double"></i></span>':''}</span>
-                                <span class="text-[9px] text-gray-500 uppercase font-black">${author?.realName || 'Dev'}</span>
-                            </div>
-                        </div>
-                        <p class="text-gray-300 text-sm">${p.content}</p>
-                    </div>`;
-                }).join('');
+                document.getElementById('feed-cont').innerHTML = posts.map(p => renderPostCard(p, users)).join('');
             }
 
             if(activeTab === 'search') {
@@ -349,12 +372,18 @@
                                     <td class="p-6">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-black bg-cover bg-center" style="${u.avatar ? `background-image:url(${u.avatar})`:''}">${u.avatar ? '':u.username[0]}</div>
-                                            <span class="font-bold text-sm flex items-center">${u.username}${u.isVerified ? '<span class="verified-badge"><i class="fas fa-check-double"></i></span>':''}</span>
+                                            <span class="font-bold text-sm flex items-center">${u.username}${getBadgeHTML(u)}</span>
                                         </div>
                                     </td>
                                     <td class="p-6"><span class="text-[9px] font-black uppercase ${u.status === 'active' ? 'text-green-500':'text-red-500'}">${u.status}</span></td>
-                                    <td class="p-6 text-right space-x-2">
-                                        <button onclick="toggleVerify('${u.username}')" class="w-8 h-8 rounded-lg ${u.isVerified ? 'bg-blue-600':'bg-white/10'}"><i class="fas fa-check-double text-[10px]"></i></button>
+                                    <td class="p-6 text-right space-x-2 relative">
+                                        <button onclick="toggleVerifyMenu('${u.username}')" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-blue-600 transition-colors"><i class="fas fa-plus text-[10px]"></i></button>
+                                        <div id="v-menu-${u.username}" class="hidden absolute right-14 top-4 glass rounded-xl p-2 z-50 flex flex-col gap-1 min-w-[120px]">
+                                            <button onclick="setVerifyType('${u.username}', 'none')" class="text-[8px] font-black uppercase p-2 hover:bg-white/5 rounded-lg text-left">Quitar</button>
+                                            <button onclick="setVerifyType('${u.username}', 'common')" class="text-[8px] font-black uppercase p-2 hover:bg-white/5 rounded-lg text-left">Común</button>
+                                            <button onclick="setVerifyType('${u.username}', 'dev')" class="text-[8px] font-black uppercase p-2 hover:bg-white/5 rounded-lg text-left">Developer</button>
+                                            <button onclick="setVerifyType('${u.username}', 'admin')" class="text-[8px] font-black uppercase p-2 hover:bg-white/5 rounded-lg text-left">Admin</button>
+                                        </div>
                                         <button onclick="ban('${u.username}')" class="w-8 h-8 rounded-lg bg-red-500/20 text-red-500"><i class="fas fa-ban text-[10px]"></i></button>
                                     </td>
                                 </tr>
@@ -368,10 +397,11 @@
         }
 
         window.viewProfile = (username) => {
+            currentProfileUser = username;
             const users = DB.getUsers();
             let u = users.find(x => x.username === username);
             if(!u && username === 'Admin_Master') {
-                u = { username: 'Admin_Master', realName: 'System Administrator', isVerified: true, avatar: null, followers: [] };
+                u = { username: 'Admin_Master', realName: 'System Administrator', isVerified: true, verifyType: 'admin', avatar: null, followers: [] };
             }
             if(!u) return;
             const isMe = session.username === username;
@@ -380,8 +410,8 @@
             document.getElementById('main-content').innerHTML = `
                 <div class="max-w-2xl mx-auto py-10 px-4 animate-fade">
                     <div class="glass p-12 rounded-[3.5rem] text-center mb-10">
-                        <div class="w-32 h-32 rounded-full bg-blue-600 mx-auto mb-6 bg-cover bg-center flex items-center justify-center text-4xl font-black" style="${u.avatar ? `background-image:url(${u.avatar})`:''}">${u.avatar ? '':u.username[0]}</div>
-                        <h2 class="text-3xl font-black italic flex items-center justify-center">${u.username}${u.isVerified ? '<span class="verified-badge" style="width:18px;height:18px;font-size:9px"><i class="fas fa-check-double"></i></span>':''}</h2>
+                        <div class="w-32 h-32 rounded-full bg-blue-600 mx-auto mb-6 bg-cover bg-center flex items-center justify-center text-4xl font-black shadow-2xl" style="${u.avatar ? `background-image:url(${u.avatar})`:''}">${u.avatar ? '':u.username[0]}</div>
+                        <h2 class="text-3xl font-black italic flex items-center justify-center">${u.username}${getBadgeHTML(u)}</h2>
                         <p class="text-xs text-gray-500 uppercase font-black tracking-widest mt-1">${u.realName || 'Sin nombre'}</p>
                         <div class="flex justify-center gap-10 my-8">
                             <div><p class="text-xl font-black">${posts.length}</p><p class="text-[8px] uppercase text-gray-500 font-black">Posts</p></div>
@@ -391,13 +421,89 @@
                             ${!isMe ? `
                                 <button onclick="alert('Siguiendo...')" class="btn-gradient px-8 py-3 rounded-xl text-[10px] font-black uppercase">Seguir</button>
                                 <button onclick="openChatInterface('${u.username}')" class="glass px-8 py-3 rounded-xl text-[10px] font-black uppercase">Mensaje</button>
-                            ` : `<button class="glass px-8 py-3 rounded-xl text-[10px] font-black uppercase">Editar Perfil</button>`}
+                            ` : `<button onclick="openEditProfile()" class="glass px-8 py-3 rounded-xl text-[10px] font-black uppercase">Editar Perfil</button>`}
                         </div>
                     </div>
-                    <div class="space-y-4">
-                        ${posts.map(p => `<div class="glass p-6 rounded-2xl text-sm">${p.content}</div>`).join('')}
+
+                    ${isMe ? `
+                        <div class="glass p-8 rounded-[2.5rem] mb-10 flex flex-col gap-4">
+                            <textarea id="p-text" class="w-full bg-transparent border-none text-base h-24 focus:ring-0 resize-none" placeholder="¿Qué estás programando hoy?"></textarea>
+                            <input type="text" id="p-img" class="w-full rounded-xl px-4 py-2 text-[10px] glass italic" placeholder="URL de Imagen (opcional)...">
+                            <div class="flex justify-end pt-4 border-t border-white/5">
+                                <button onclick="publish()" class="btn-gradient px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest">Publicar</button>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="space-y-8">
+                        ${posts.map(p => renderPostCard(p, users)).join('')}
                     </div>
                 </div>`;
+        };
+
+        window.openEditProfile = () => {
+            const users = DB.getUsers();
+            const me = users.find(x => x.username === session.username);
+            if(!me) return alert("Los administradores maestros no pueden ser editados localmente.");
+
+            document.getElementById('main-content').innerHTML = `
+                <div class="max-w-md mx-auto py-20 px-4 animate-fade">
+                    <div class="glass p-10 rounded-[3rem] space-y-6">
+                        <h2 class="text-2xl font-black italic mb-8">EDITAR PERFIL</h2>
+                        <div class="space-y-4">
+                            <input type="text" id="edit-avatar" class="w-full rounded-2xl px-5 py-4 text-sm" placeholder="URL Nueva Foto Perfil" value="${me.avatar || ''}">
+                            <input type="text" id="edit-user" class="w-full rounded-2xl px-5 py-4 text-sm" placeholder="Nuevo Usuario" value="${me.username}">
+                            <input type="password" id="edit-newpass" class="w-full rounded-2xl px-5 py-4 text-sm" placeholder="Nueva Contraseña (opcional)">
+                            <div class="pt-4 border-t border-white/5">
+                                <p class="text-[9px] font-black text-gray-500 uppercase mb-2">Confirmar Cambios</p>
+                                <input type="password" id="edit-currpass" class="w-full rounded-2xl px-5 py-4 text-sm border-blue-500/50" placeholder="Contraseña Actual">
+                            </div>
+                            <button onclick="saveProfile()" class="w-full btn-gradient py-4 rounded-2xl font-bold uppercase tracking-widest text-xs">Guardar Cambios</button>
+                            <button onclick="viewProfile(session.username)" class="w-full text-gray-500 text-[10px] font-black uppercase">Cancelar</button>
+                        </div>
+                    </div>
+                </div>`;
+        };
+
+        window.saveProfile = () => {
+            const users = DB.getUsers();
+            const me = users.find(x => x.username === session.username);
+            const currPass = document.getElementById('edit-currpass').value;
+
+            if(currPass !== me.password) return alert("Contraseña actual incorrecta.");
+
+            const newUser = document.getElementById('edit-user').value.trim();
+            const newPass = document.getElementById('edit-newpass').value.trim();
+            const newAv = document.getElementById('edit-avatar').value.trim();
+
+            if(!newUser) return alert("El nombre de usuario no puede estar vacío.");
+
+            // Si cambia el username, actualizar sesión y posts
+            if(newUser !== me.username) {
+                if(users.find(x => x.username === newUser)) return alert("El nombre de usuario ya está en uso.");
+                // Actualizar posts
+                const posts = DB.getPosts();
+                posts.forEach(p => { if(p.author === me.username) p.author = newUser; });
+                localStorage.setItem('cd_v4_posts', JSON.stringify(posts));
+                // Actualizar mensajes
+                const chats = DB.getMessages();
+                chats.forEach(m => {
+                    if(m.from === me.username) m.from = newUser;
+                    if(m.to === me.username) m.to = newUser;
+                });
+                localStorage.setItem('cd_v4_chats', JSON.stringify(chats));
+
+                session.username = newUser;
+                sessionStorage.setItem('cd_session', JSON.stringify(session));
+            }
+
+            me.username = newUser;
+            if(newPass) me.password = newPass;
+            me.avatar = newAv;
+
+            DB.saveUser(me);
+            alert("Perfil actualizado exitosamente.");
+            location.reload();
         };
 
         window.searchUsers = (q) => {
@@ -408,10 +514,12 @@
                 <div onclick="viewProfile('${u.username}')" class="glass p-4 rounded-2xl flex items-center gap-4 cursor-pointer hover:bg-white/5">
                     <div class="w-10 h-10 rounded-full bg-blue-600 bg-cover bg-center flex items-center justify-center font-black" style="${u.avatar ? `background-image:url(${u.avatar})`:''}">${u.avatar ? '':u.username[0]}</div>
                     <div class="flex-1">
-                        <p class="text-sm font-bold flex items-center">${u.username}${u.isVerified ? '<span class="verified-badge"><i class="fas fa-check-double"></i></span>':''}</p>
+                        <p class="text-sm font-bold flex items-center">${u.username}${getBadgeHTML(u)}</p>
                         <p class="text-[8px] text-gray-500 font-black">${u.realName || ''}</p>
                     </div>
-                    ${session.role === 'admin' ? `<button onclick="event.stopPropagation(); toggleVerify('${u.username}')" class="text-blue-500"><i class="fas fa-plus"></i></button>` : ''}
+                    ${session.role === 'admin' ? `
+                        <button onclick="event.stopPropagation(); switchTab('admin')" class="text-blue-500 text-[10px] font-black uppercase">Gestionar</button>
+                    ` : ''}
                 </div>`).join('');
         };
 
@@ -427,8 +535,8 @@
             const users = DB.getUsers().filter(u => u.username !== session.username);
             list.innerHTML = users.map(u => `
                 <div onclick="selectChat('${u.username}')" class="p-5 flex items-center gap-4 cursor-pointer ${currentChatUser === u.username ? 'bg-white/5':''}">
-                    <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black" style="${u.avatar ? `background-image:url(${u.avatar})`:''}">${u.avatar ? '':u.username[0]}</div>
-                    <p class="text-sm font-bold truncate">${u.username}</p>
+                    <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black bg-cover bg-center" style="${u.avatar ? `background-image:url(${u.avatar})`:''}">${u.avatar ? '':u.username[0]}</div>
+                    <p class="text-sm font-bold truncate flex items-center">${u.username}${getBadgeHTML(u)}</p>
                 </div>`).join('');
         }
 
@@ -446,8 +554,9 @@
             const msgs = DB.getMessages().filter(m => (m.from === session.username && m.to === currentChatUser) || (m.from === currentChatUser && m.to === session.username));
             cont.innerHTML = msgs.map(m => `
                 <div class="flex ${m.from === session.username ? 'justify-end':'justify-start'} animate-fade">
-                    <div class="${m.from === session.username ? 'chat-msg-me':'chat-msg-them'} px-5 py-3 text-sm">
-                        ${m.text}
+                    <div class="${m.from === session.username ? 'chat-msg-me':'chat-msg-them'} px-5 py-3 text-sm max-w-[80%]">
+                        ${m.image ? `<img src="${m.image}" class="rounded-xl mb-3 max-h-60 w-full object-cover border border-white/10 shadow-xl">` : ''}
+                        <p>${m.text}</p>
                     </div>
                 </div>`).join('');
             cont.scrollTop = cont.scrollHeight;
@@ -455,16 +564,34 @@
 
         window.sendMessage = () => {
             const inp = document.getElementById('chat-input');
-            if(!inp.value.trim()) return;
-            DB.saveMessage({ from: session.username, to: currentChatUser, text: inp.value.trim(), time: Date.now() });
+            const img = document.getElementById('chat-img');
+            if(!inp.value.trim() && !img.value.trim()) return;
+            DB.saveMessage({ from: session.username, to: currentChatUser, text: inp.value.trim(), image: img.value.trim(), time: Date.now() });
             inp.value = "";
+            img.value = "";
             loadMessages();
+        };
+
+        window.toggleVerifyMenu = (username) => {
+            const el = document.getElementById(`v-menu-${username}`);
+            el.classList.toggle('hidden');
+        };
+
+        window.setVerifyType = (username, type) => {
+            const users = DB.getUsers();
+            const u = users.find(x => x.username === username);
+            if(u) {
+                u.verifyType = type;
+                u.isVerified = (type !== 'none');
+                DB.saveUser(u);
+                renderContent();
+            }
         };
 
         window.toggleVerify = (username) => {
             const users = DB.getUsers();
             const u = users.find(x => x.username === username);
-            if(u) { u.isVerified = !u.isVerified; localStorage.setItem('cd_v4_users', JSON.stringify(users)); renderContent(); }
+            if(u) { u.isVerified = !u.isVerified; u.verifyType = u.isVerified ? 'common':'none'; DB.saveUser(u); renderContent(); }
         };
 
         window.ban = (username) => {
@@ -475,11 +602,84 @@
 
         window.publish = () => {
             const txt = document.getElementById('p-text').value.trim();
-            if(!txt) return;
-            DB.savePost({author: session.username, content: txt, timestamp: Date.now()});
+            const img = document.getElementById('p-img') ? document.getElementById('p-img').value.trim() : "";
+            if(!txt && !img) return;
+            DB.savePost({author: session.username, content: txt, image: img, timestamp: Date.now()});
             document.getElementById('p-text').value = "";
+            if(document.getElementById('p-img')) document.getElementById('p-img').value = "";
             renderContent();
+            if(activeTab === 'view_profile') viewProfile(currentProfileUser);
         };
+
+        function renderPostCard(p, users) {
+            const author = users.find(u => u.username === p.author) || { username: p.author };
+            const isLiked = p.likes?.includes(session.username);
+            return `
+            <div class="glass p-8 rounded-[2.5rem] animate-fade space-y-4">
+                <div class="flex items-center gap-4 mb-4 cursor-pointer" onclick="viewProfile('${p.author}')">
+                    <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black bg-cover bg-center" style="${author?.avatar ? `background-image:url(${author.avatar})`:''}">${author?.avatar ? '':p.author[0]}</div>
+                    <div>
+                        <span class="font-bold text-sm block flex items-center">${p.author}${getBadgeHTML(author)}</span>
+                        <span class="text-[9px] text-gray-500 uppercase font-black">${author?.realName || 'Dev'}</span>
+                    </div>
+                </div>
+                <p class="text-gray-300 text-sm">${p.content}</p>
+                ${p.image ? `<img src="${p.image}" class="w-full rounded-3xl border border-white/5 shadow-2xl max-h-[400px] object-cover">` : ''}
+
+                <div class="flex items-center gap-6 pt-4 border-t border-white/5">
+                    <button onclick="toggleLike('${p.id}')" class="flex items-center gap-2 ${isLiked ? 'text-blue-500':'text-gray-500'} hover:text-blue-400 transition-colors">
+                        <i class="${isLiked ? 'fas':'far'} fa-heart"></i>
+                        <span class="text-[10px] font-black">${p.likes?.length || 0}</span>
+                    </button>
+                    <button onclick="focusComment('${p.id}')" class="flex items-center gap-2 text-gray-500 hover:text-white transition-colors">
+                        <i class="far fa-comment"></i>
+                        <span class="text-[10px] font-black">${p.comments?.length || 0}</span>
+                    </button>
+                </div>
+
+                <div class="space-y-3 pt-4">
+                    ${p.comments?.map(c => `
+                        <div class="flex gap-3 text-[11px]">
+                            <span class="font-black text-blue-500">${c.user}:</span>
+                            <span class="text-gray-400">${c.text}</span>
+                        </div>
+                    `).join('')}
+                    <div class="flex gap-2 mt-4">
+                        <input type="text" id="cmt-input-${p.id}" class="flex-1 glass rounded-xl px-4 py-2 text-[10px]" placeholder="Escribe un comentario..." onkeypress="if(event.key==='Enter') addComment('${p.id}')">
+                        <button onclick="addComment('${p.id}')" class="text-blue-500 text-[10px] font-black uppercase">Post</button>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        window.toggleLike = (postId) => {
+            const posts = DB.getPosts();
+            const p = posts.find(x => x.id === postId);
+            if(!p) return;
+            if(!p.likes) p.likes = [];
+            const idx = p.likes.indexOf(session.username);
+            if(idx > -1) p.likes.splice(idx, 1);
+            else p.likes.push(session.username);
+            DB.updatePost(p);
+            renderContent();
+            if(activeTab === 'view_profile') viewProfile(currentProfileUser);
+        };
+
+        window.addComment = (postId) => {
+            const inp = document.getElementById(`cmt-input-${postId}`);
+            if(!inp.value.trim()) return;
+            const posts = DB.getPosts();
+            const p = posts.find(x => x.id === postId);
+            if(!p) return;
+            if(!p.comments) p.comments = [];
+            p.comments.push({ user: session.username, text: inp.value.trim(), time: Date.now() });
+            DB.updatePost(p);
+            inp.value = "";
+            renderContent();
+            if(activeTab === 'view_profile') viewProfile(currentProfileUser);
+        };
+
+        window.focusComment = (postId) => document.getElementById(`cmt-input-${postId}`).focus();
 
         window.logout = () => { sessionStorage.clear(); location.reload(); };
     </script>
