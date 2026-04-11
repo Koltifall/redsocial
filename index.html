@@ -9,7 +9,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
         :root { --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(255, 255, 255, 0.1); --accent: #3b82f6; }
-        body { font-family: 'Inter', sans-serif; background: #020202; color: #f3f4f6; margin: 0; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background: #020202; color: #f3f4f6; margin: 0; }
         .glass { background: var(--glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--glass-border); }
         .liquid-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 90% 90%, rgba(139, 92, 246, 0.1) 0%, transparent 50%); }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
@@ -41,10 +41,10 @@
         .ban-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .chat-msg-me { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 1.5rem 1.5rem 0.2rem 1.5rem; }
         .chat-msg-them { background: rgba(255,255,255,0.05); border-radius: 1.5rem 1.5rem 1.5rem 0.2rem; }
-        .v-menu { position: absolute; right: 100%; top: 0; margin-right: 0.5rem; min-width: 150px; }
+        .v-menu { position: absolute; right: 0; bottom: 100%; margin-bottom: 0.5rem; min-width: 150px; z-index: 100; }
     </style>
 </head>
-<body class="custom-scrollbar">
+<body class="custom-scrollbar overflow-x-hidden">
     <div class="liquid-bg"></div>
 
     <!-- PANTALLA DE BLOQUEO -->
@@ -73,7 +73,7 @@
 
     <div id="app">
         <!-- AUTH -->
-        <section id="view-auth" class="min-h-screen flex items-center justify-center p-6 animate-fade">
+        <section id="view-auth" class="min-h-screen flex items-center justify-center p-6 animate-fade hidden">
             <div class="glass w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl">
                 <div class="text-center mb-10">
                     <h1 class="text-4xl font-black italic tracking-tighter">VORTEX HUB</h1>
@@ -225,7 +225,7 @@
         // --- HELPERS ---
         function getBadgeHTML(u) {
             if(!u) return "";
-            const type = (u.username === 'Admin_Master') ? 'admin' : (u.verifyType || (u.isVerified ? 'common' : 'none'));
+            const type = (u.username === 'Admin_Master' || u.username === '593-EC.dev') ? 'admin' : (u.verifyType || (u.isVerified ? 'common' : 'none'));
             if(type === 'common') return '<span class="verified-badge bg-blue-500"><i class="fas fa-check"></i></span>';
             if(type === 'dev') return '<span class="verified-badge bg-orange-500"><i class="fas fa-hammer"></i></span>';
             if(type === 'admin') return '<span class="verified-badge bg-yellow-500 text-black"><i class="fas fa-star"></i></span>';
@@ -240,7 +240,10 @@
         let isAdminLogin = false;
         let isSignupMode = false;
 
-        window.onload = () => { if(session) checkStatusAndShow(); };
+        window.onload = () => {
+            if(session) checkStatusAndShow();
+            else document.getElementById('view-auth').classList.remove('hidden');
+        };
 
         function checkStatusAndShow() {
             const users = DB.getUsers();
@@ -278,7 +281,7 @@
                 const nro = document.getElementById('admin-nro').value.trim();
                 const clave = document.getElementById('admin-clave').value.trim();
                 if(nro === "593-EC.dev" && clave === "24865139") {
-                    session = { username: 'Admin_Master', role: 'admin' };
+                    session = { username: '593-EC.dev', role: 'admin' };
                     localStorage.setItem('cd_session', JSON.stringify(session));
                     location.reload();
                 } else alert('Error: Credenciales administrativas inválidas.');
@@ -297,8 +300,12 @@
                     if(userExists) return alert('Usuario ya existe.');
                     if(!name) return alert('Ingresa tu nombre real.');
                     DB.saveUser({username: u, password: p, realName: name});
-                    alert('¡Registro exitoso! Ahora inicia sesión.');
-                    toggleAuthMode();
+
+                    // Auto Login after signup
+                    session = { username: u, role: 'user' };
+                    localStorage.setItem('cd_session', JSON.stringify(session));
+                    alert('¡Registro exitoso! Bienvenido.');
+                    location.reload();
                 } else {
                     if(!userExists || userExists.password !== p) return alert('Usuario o contraseña incorrectos.');
                     session = { username: u, role: 'user' };
@@ -388,7 +395,7 @@
                 main.innerHTML = `<div class="p-10 max-w-5xl mx-auto space-y-10">
                     <h2 class="text-3xl font-black italic">CONTROL</h2>
                     <div class="grid grid-cols-1 gap-8">
-                        <div class="glass rounded-[2.5rem] overflow-hidden">
+                        <div class="glass rounded-[2.5rem]">
                             <table class="w-full text-left">
                                 <thead class="bg-white/5 text-[10px] font-black text-gray-500">
                                     <tr><th class="p-6">Usuario</th><th class="p-6">Estado</th><th class="p-6 text-right">Acciones</th></tr>
@@ -460,8 +467,8 @@
             currentProfileUser = username;
             const users = DB.getUsers();
             let u = users.find(x => x.username === username);
-            if(!u && username === 'Admin_Master') {
-                u = { username: 'Admin_Master', realName: 'System Administrator', isVerified: true, verifyType: 'admin', avatar: null, followers: [] };
+            if(!u && (username === 'Admin_Master' || username === '593-EC.dev')) {
+                u = { username: username, realName: 'System Administrator', isVerified: true, verifyType: 'admin', avatar: null, followers: [] };
             }
             if(!u) return;
             const isMe = session.username === username;
@@ -927,11 +934,12 @@
 
         window.requestVerification = () => {
             if(confirm("¿Deseas solicitar la verificación de tu perfil? Se abrirá un chat con el administrador.")) {
-                openChatInterface('Admin_Master');
+                const adminName = '593-EC.dev';
+                openChatInterface(adminName);
                 // Enviar mensaje automático si no existe chat previo
-                const msgs = DB.getMessages().filter(m => (m.from === session.username && m.to === 'Admin_Master') || (m.from === 'Admin_Master' && m.to === session.username));
+                const msgs = DB.getMessages().filter(m => (m.from === session.username && m.to === adminName) || (m.from === adminName && m.to === session.username));
                 if(msgs.length === 0) {
-                    DB.saveMessage({ from: session.username, to: 'Admin_Master', text: "Hola, me gustaría solicitar la verificación de mi perfil.", time: Date.now() });
+                    DB.saveMessage({ from: session.username, to: adminName, text: "Hola, me gustaría solicitar la verificación de mi perfil.", time: Date.now() });
                     loadMessages();
                 }
             }
